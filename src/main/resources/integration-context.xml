@@ -5,21 +5,10 @@
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
 		http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration-4.2.xsd">
 
-	<!-- Endpoint -->	
-	<int:gateway service-interface="com.oreilly.demo.CustomGateway" default-request-channel="inputChannel">
-		<int:method name="print"/>	
-	</int:gateway>
 
-	<!-- Channel -->
 	<int:channel id="inputChannel"/>
-
-	<!-- Endpoint -->	
-	<int:service-activator ref="reverseService" input-channel="inputChannel" method="reverse"/>
-
-	<!-- Spring Bean -->
-	<bean id="printService" class="com.oreilly.demo.PrintService"/>
-
-	<!--  Spring Bean -->
-	<bean id="reverseService" class="com.oreilly.demo.ReverseService"/>
+	<int:channel id="outputChannel"/>
+	<bean class="com.oreilly.demo.PrintService" id="printService"/>
+	<int:service-activator ref="printService" method="print" input-channel="inputChannel" output-channel="outputChannel"/>
 
 </beans>
