@@ -9,6 +9,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportResource;
 import org.springframework.integration.channel.DirectChannel;
+import org.springframework.integration.core.MessagingTemplate;
 import org.springframework.integration.support.MessageBuilder;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
@@ -22,10 +23,6 @@ public class SpringIntegrationDemoApplication implements ApplicationRunner {
     @Autowired
     @Qualifier("inputChannel")
     private DirectChannel inputChannel;
-
-    @Autowired
-    @Qualifier("outputChannel")
-    private DirectChannel outputChannel;
 
     public static void main(String[] args) {
         SpringApplication.run(SpringIntegrationDemoApplication.class, args);
@@ -62,15 +59,10 @@ public class SpringIntegrationDemoApplication implements ApplicationRunner {
 
          */
 
-        outputChannel.subscribe(new MessageHandler() {
-            @Override
-            public void handleMessage(Message<?> message) throws MessagingException {
-                System.out.println(message.getPayload());
-            }
-        });
-
         Message<String> message = MessageBuilder.withPayload("Hello World, from the builder pattern").setHeader("newHeader", "newHeaderValue").build();
-        inputChannel.send(message);
+        MessagingTemplate template = new MessagingTemplate();
+        Message<String> returnMessage = (Message<String>) template.sendAndReceive(inputChannel, message);
+        System.out.println(returnMessage.getPayload());
 
     }
 }

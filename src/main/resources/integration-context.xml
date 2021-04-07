@@ -7,8 +7,7 @@
 
 
 	<int:channel id="inputChannel"/>
-	<int:channel id="outputChannel"/>
 	<bean class="com.oreilly.demo.PrintService" id="printService"/>
-	<int:service-activator ref="printService" method="print" input-channel="inputChannel" output-channel="outputChannel"/>
+	<int:service-activator ref="printService" method="print" input-channel="inputChannel"/>
 
 </beans>
