@@ -5,14 +5,5 @@
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
 		http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration-4.2.xsd">
 
-	<bean id ="customComparator" class="com.oreilly.demo.CustomMessageComparator"/>
-	<int:gateway service-interface="com.oreilly.demo.PrinterGateway" default-request-channel="inputChannel"/>
-	<int:channel id="inputChannel">
-		<int:priority-queue capacity="10" comparator="customComparator"/>
-	</int:channel>
-	<bean class="com.oreilly.demo.PrintService" id="printService"/>
-	<int:service-activator ref="printService" method="print" input-channel="inputChannel">
-		<int:poller fixed-rate="10" time-unit="SECONDS" max-messages-per-poll="2"/>
-	</int:service-activator>
 
 </beans>

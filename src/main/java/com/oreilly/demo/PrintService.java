@@ -1,13 +1,24 @@
 package com.oreilly.demo;
 
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.integration.annotation.MessageEndpoint;
+import org.springframework.integration.annotation.MessagingGateway;
+import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.stereotype.Component;
 
+@Component
 public class PrintService {
 
-	public Message<?> print(Message<String> message) {
+	@ServiceActivator(inputChannel = "inputChannel")
+	public void print(Message<String> message) {
 		System.out.println(message.getPayload());
-		return MessageBuilder.withPayload("Sending a reply for message "+message.getHeaders().get("messageNumber")).build();
+	}
+
+	@ServiceActivator(inputChannel = "inputChannel")
+	public void printUpper(Message<String> message) {
+		System.out.println(message.getPayload().toUpperCase());
 	}
 
 }
