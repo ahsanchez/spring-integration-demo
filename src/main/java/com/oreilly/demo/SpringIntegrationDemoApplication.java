@@ -10,10 +10,14 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportResource;
 import org.springframework.integration.channel.DirectChannel;
 import org.springframework.integration.core.MessagingTemplate;
-import org.springframework.integration.support.MessageBuilder;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessagingException;
+import org.springframework.messaging.support.MessageBuilder;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Future;
 
 @SpringBootApplication
 @Configuration
@@ -21,8 +25,7 @@ import org.springframework.messaging.MessagingException;
 public class SpringIntegrationDemoApplication implements ApplicationRunner {
 
     @Autowired
-    @Qualifier("inputChannel")
-    private DirectChannel inputChannel;
+    private PrinterGateway gateway;
 
     public static void main(String[] args) {
         SpringApplication.run(SpringIntegrationDemoApplication.class, args);
@@ -31,38 +34,15 @@ public class SpringIntegrationDemoApplication implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments arg0) throws Exception {
 
-        // Part 1.
-        /* Map<String, Object> map = new HashMap<String, Object>();
-        map.put("key", "value");
-        MessageHeaders headers = new MessageHeaders(map);
-        Message<String> message = MessageBuilder.withPayload("Hello World, from the builder pattern").setHeader("newHeader", "newHeaderValue").build();
-        PrintService03 service = new PrintService03();
-        service.print(message);*/
+        List<Future<Message<String>>> futures = new ArrayList<>();
+        for (int i=0; i<10; i++) {
+            Message<String> message = MessageBuilder.withPayload("Printing message payload for "+i).setHeader("messageNumber", i).build();
+            System.out.println("Sending message "+ i);
+            futures.add(this.gateway.print(message));
+        }
 
-        // Part 2.
-        /*
-        Message<String> message = MessageBuilder.withPayload("Hello World, from the builder pattern").setHeader("newHeader", "newHeaderValue").build();
-        PrintService03 service = new PrintService03();
-        service.print(message);
-         */
-
-        /* Part 3.
-        channel.subscribe(new MessageHandler() {
-            @Override
-            public void handleMessage(Message<?> message) throws MessagingException {
-                new PrintService03().print((Message<String>) message);
-            }
-        });
-
-        Message<String> message = MessageBuilder.withPayload("Hello World, from the builder pattern").setHeader("newHeader", "newHeaderValue").build();
-        channel.send(message);
-
-         */
-
-        Message<String> message = MessageBuilder.withPayload("Hello World, from the builder pattern").setHeader("newHeader", "newHeaderValue").build();
-        MessagingTemplate template = new MessagingTemplate();
-        Message<String> returnMessage = (Message<String>) template.sendAndReceive(inputChannel, message);
-        System.out.println(returnMessage.getPayload());
-
+        for (Future<Message<String>> f : futures) {
+            System.out.println(f.get().getPayload());
+        }
     }
 }
