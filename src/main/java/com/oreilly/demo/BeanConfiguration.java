@@ -1,5 +1,6 @@
 package com.oreilly.demo;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -9,6 +10,8 @@ import org.springframework.integration.channel.PublishSubscribeChannel;
 import org.springframework.integration.channel.QueueChannel;
 import org.springframework.integration.config.EnableIntegration;
 import org.springframework.scheduling.config.TaskExecutorFactoryBean;
+
+import java.util.Collections;
 
 @Configuration
 @EnableIntegration
@@ -22,8 +25,11 @@ public class BeanConfiguration {
     }
 
     @Bean
-    public QueueChannel pollChannel() {
-        return new QueueChannel(10);
+    @Autowired
+    public QueueChannel pollChannel(CustomChannelInterceptor interceptor) {
+        QueueChannel queueChannel = new QueueChannel(10);
+        queueChannel.setInterceptors(Collections.singletonList(interceptor));
+        return queueChannel;
     }
 
     @Bean
@@ -32,6 +38,12 @@ public class BeanConfiguration {
         executor.setPoolSize("5");
         return executor.getObject();
     }
+
+    @Bean
+    public CustomChannelInterceptor interceptor() {
+        return new CustomChannelInterceptor();
+    }
+
 /*
     @Bean
     @Autowired
