@@ -8,10 +8,12 @@ import org.springframework.integration.annotation.IntegrationComponentScan;
 import org.springframework.integration.channel.DirectChannel;
 import org.springframework.integration.config.EnableIntegration;
 import org.springframework.integration.endpoint.EventDrivenConsumer;
-import org.springframework.integration.router.HeaderValueRouter;
+import org.springframework.integration.filter.ExpressionEvaluatingSelector;
+import org.springframework.integration.router.RecipientListRouter;
+import org.springframework.messaging.MessageChannel;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 @Configuration
 @EnableIntegration
@@ -25,29 +27,20 @@ public class BeanConfiguration {
 
     @Bean
     @Autowired
-    public EventDrivenConsumer eventDrivenConsumer(DirectChannel inputChannel, HeaderValueRouter headerValueRouter) {
-        return new EventDrivenConsumer(inputChannel, headerValueRouter);
+    public EventDrivenConsumer eventDrivenConsumer(DirectChannel inputChannel, RecipientListRouter recipientListRouter) {
+        return new EventDrivenConsumer(inputChannel, recipientListRouter);
     }
 
     @Bean
-    public HeaderValueRouter headerValueRouter() {
-        HeaderValueRouter headerValueRouter = new HeaderValueRouter("routeHeader");
-        Map<String, String> channelMappings = new HashMap<>();
-        channelMappings.put("int", "intChannel");
-        channelMappings.put("string", "stringChannel");
-        headerValueRouter.setChannelMappings(channelMappings);
-        return headerValueRouter;
-    }
-/*
-    @Bean
-    public PayloadTypeRouter payloadTypeRouter() {
-        PayloadTypeRouter payloadTypeRouter = new PayloadTypeRouter();
-        Map<String, String> channelMappings = new HashMap<>();
-        channelMappings.put("java.lang.Integer", "intChannel");
-        channelMappings.put("java.lang.String", "stringChannel");
-        payloadTypeRouter.setChannelMappings(channelMappings);
+    @Autowired
+    public RecipientListRouter recipientListRouter(MessageChannel intChannel, MessageChannel stringChannel) {
+        RecipientListRouter recipientListRouter = new RecipientListRouter();
 
-        return payloadTypeRouter;
-    }*/
+        List<RecipientListRouter.Recipient> recipientList = new ArrayList<>();
+        recipientList.add(new RecipientListRouter.Recipient(intChannel, new ExpressionEvaluatingSelector("payload.equals(5)")));
+        recipientList.add(new RecipientListRouter.Recipient(stringChannel));
+        recipientListRouter.setRecipients(recipientList);
+        return recipientListRouter;
+    }
 
 }
