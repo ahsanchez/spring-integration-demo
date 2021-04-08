@@ -33,9 +33,8 @@ public class SpringIntegrationDemoApplication implements ApplicationRunner {
         // BridgeHandler bridgeHandler = (BridgeHandler) ((AnnotationConfigApplicationContext) this.context).getBeanDefinition("mybridge").getPropertyValues().getPropertyValues()[0].getValue();;
         /* Direct channel */
         for (int i = 0; i < 10; i++) {
-            Message<String> message = MessageBuilder
-                    .withPayload("Printing message payload for " + i)
-                    .setHeader("messageNumber", i)
+            Message<?> message = MessageBuilder
+                    .withPayload(i)
                     .build();
             this.gateway.print(message);
         }

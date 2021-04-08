@@ -6,9 +6,9 @@ import org.springframework.integration.annotation.Gateway;
 import org.springframework.integration.annotation.MessagingGateway;
 import org.springframework.messaging.Message;
 
-@MessagingGateway(defaultRequestChannel = "pollChannel")
+@MessagingGateway(defaultRequestChannel = "inputChannel")
 @Qualifier("printerGateway")
 public interface PrinterGateway {
-    @Gateway(requestChannel = "pollChannel")
+    @Gateway(requestChannel = "inputChannel")
     public void print(Message<?> message);
 }

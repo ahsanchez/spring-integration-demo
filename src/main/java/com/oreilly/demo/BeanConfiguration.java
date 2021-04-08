@@ -4,61 +4,39 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.task.TaskExecutor;
 import org.springframework.integration.annotation.IntegrationComponentScan;
-import org.springframework.integration.channel.PublishSubscribeChannel;
-import org.springframework.integration.channel.QueueChannel;
+import org.springframework.integration.channel.DirectChannel;
 import org.springframework.integration.config.EnableIntegration;
-import org.springframework.scheduling.config.TaskExecutorFactoryBean;
+import org.springframework.integration.endpoint.EventDrivenConsumer;
+import org.springframework.integration.router.PayloadTypeRouter;
 
-import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 @Configuration
 @EnableIntegration
 @ComponentScan
 @IntegrationComponentScan
 public class BeanConfiguration {
-
     @Bean
-    public PublishSubscribeChannel inputChannel() {
-        return new PublishSubscribeChannel(executor());
+    public DirectChannel inputChannel() {
+        return new DirectChannel();
     }
 
     @Bean
     @Autowired
-    public QueueChannel pollChannel(CustomChannelInterceptor interceptor) {
-        QueueChannel queueChannel = new QueueChannel(10);
-        queueChannel.setInterceptors(Collections.singletonList(interceptor));
-        return queueChannel;
+    public EventDrivenConsumer eventDrivenConsumer(DirectChannel inputChannel, PayloadTypeRouter payloadTypeRouter) {
+        return new EventDrivenConsumer(inputChannel, payloadTypeRouter);
     }
 
     @Bean
-    public TaskExecutor executor() {
-        TaskExecutorFactoryBean executor = new TaskExecutorFactoryBean();
-        executor.setPoolSize("5");
-        return executor.getObject();
+    public PayloadTypeRouter payloadTypeRouter() {
+        PayloadTypeRouter payloadTypeRouter = new PayloadTypeRouter();
+        Map<String, String> channelMappings = new HashMap<>();
+        channelMappings.put("java.lang.Integer", "intChannel");
+        channelMappings.put("java.lang.String", "stringChannel");
+        payloadTypeRouter.setChannelMappings(channelMappings);
+        return payloadTypeRouter;
     }
-
-    @Bean
-    public CustomChannelInterceptor interceptor() {
-        return new CustomChannelInterceptor();
-    }
-
-/*
-    @Bean
-    @Autowired
-    public ConsumerEndpointFactoryBean bridge(PublishSubscribeChannel inputChannel, QueueChannel pollChannel) {
-        ConsumerEndpointFactoryBean consumerEndpointFactoryBean = new ConsumerEndpointFactoryBean();
-        consumerEndpointFactoryBean.setInputChannel(pollChannel);
-        PollerMetadata pollerMetadata = new PollerMetadata();
-        pollerMetadata.setMaxMessagesPerPoll(2);
-        consumerEndpointFactoryBean.setPollerMetadata(pollerMetadata);
-        BridgeHandler bridgeHandler = new BridgeHandler();
-        bridgeHandler.setOutputChannel(inputChannel);
-        consumerEndpointFactoryBean.setHandler(bridgeHandler);
-        PollingConsumer pollingConsumer = new PollingConsumer();
-        return consumerEndpointFactoryBean;
-    }*/
-
 
 }
