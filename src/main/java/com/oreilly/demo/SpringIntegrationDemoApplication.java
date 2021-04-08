@@ -28,17 +28,13 @@ public class SpringIntegrationDemoApplication implements ApplicationRunner {
     }
 
     @Override
-    public void run(ApplicationArguments arg0) throws Exception {
-        //  Object mybridge = ((AnnotationConfigApplicationContext) this.context).getBeanDefinition("mybridge").getPropertyValues().getPropertyValues()[0].getValue();
-        // BridgeHandler bridgeHandler = (BridgeHandler) ((AnnotationConfigApplicationContext) this.context).getBeanDefinition("mybridge").getPropertyValues().getPropertyValues()[0].getValue();;
-        /* Direct channel */
+    public void run(ApplicationArguments arg0) {
         for (int i = 0; i < 10; i++) {
             Message<?> message = MessageBuilder
                     .withPayload(i)
+                    .setHeader("routeHeader", "string")
                     .build();
             this.gateway.print(message);
         }
     }
-
-
 }

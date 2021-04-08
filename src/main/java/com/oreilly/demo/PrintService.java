@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 public class PrintService {
 
     @ServiceActivator(inputChannel = "stringChannel")
-    public void print(Message<String> message) {
+    public void print(Message<?> message) {
         System.out.println(message.getPayload());
     }
 
