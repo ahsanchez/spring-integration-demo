@@ -9,7 +9,7 @@ public class PrintService {
 
     @ServiceActivator(inputChannel = "stringChannel")
     public void print(Message<?> message) {
-        System.out.println(message.getPayload());
+        System.out.println("Printing the string: " + message.getPayload());
     }
 
     @ServiceActivator(inputChannel = "intChannel")
@@ -17,4 +17,8 @@ public class PrintService {
         System.out.println("Printing the numeric: " + message.getPayload());
     }
 
+    @ServiceActivator(inputChannel = "defaultChannel")
+    public void defaultPrint(Message<?> message) {
+        System.out.println("Printing from the default service: " + message.getPayload());
+    }
 }

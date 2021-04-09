@@ -27,6 +27,11 @@ public class BeanConfiguration {
     }
 
     @Bean
+    public DirectChannel defaultChannel() {
+        return new DirectChannel();
+    }
+
+    @Bean
     @Autowired
     public EventDrivenConsumer eventDrivenConsumer(DirectChannel inputChannel, RecipientListRouter recipientListRouter) {
         return new EventDrivenConsumer(inputChannel, recipientListRouter);
@@ -34,15 +39,16 @@ public class BeanConfiguration {
 
     @Bean
     @Autowired
-    public RecipientListRouter recipientListRouter(MessageChannel intChannel, MessageChannel stringChannel) {
+    public RecipientListRouter recipientListRouter(MessageChannel intChannel, MessageChannel stringChannel, MessageChannel defaultChannel) {
         RecipientListRouter recipientListRouter = new RecipientListRouter();
+        recipientListRouter.setDefaultOutputChannel(defaultChannel);
 
         ExpressionEvaluatingSelector expressionEvaluatingSelector = new ExpressionEvaluatingSelector("payload.equals(5)");
         expressionEvaluatingSelector.setBeanFactory(new DefaultListableBeanFactory());
 
         List<RecipientListRouter.Recipient> recipientList = new ArrayList<>();
         recipientList.add(new RecipientListRouter.Recipient(intChannel, expressionEvaluatingSelector));
-        recipientList.add(new RecipientListRouter.Recipient(stringChannel));
+        recipientList.add(new RecipientListRouter.Recipient(stringChannel, expressionEvaluatingSelector));
 
         recipientListRouter.setRecipients(recipientList);
         return recipientListRouter;
