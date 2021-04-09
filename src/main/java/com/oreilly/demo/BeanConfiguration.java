@@ -1,6 +1,7 @@
 package com.oreilly.demo;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -36,11 +37,16 @@ public class BeanConfiguration {
     public RecipientListRouter recipientListRouter(MessageChannel intChannel, MessageChannel stringChannel) {
         RecipientListRouter recipientListRouter = new RecipientListRouter();
 
+        ExpressionEvaluatingSelector expressionEvaluatingSelector = new ExpressionEvaluatingSelector("payload.equals(5)");
+        expressionEvaluatingSelector.setBeanFactory(new DefaultListableBeanFactory());
+
         List<RecipientListRouter.Recipient> recipientList = new ArrayList<>();
-        recipientList.add(new RecipientListRouter.Recipient(intChannel, new ExpressionEvaluatingSelector("payload.equals(5)")));
+        recipientList.add(new RecipientListRouter.Recipient(intChannel, expressionEvaluatingSelector));
         recipientList.add(new RecipientListRouter.Recipient(stringChannel));
+
         recipientListRouter.setRecipients(recipientList);
         return recipientListRouter;
     }
+
 
 }
