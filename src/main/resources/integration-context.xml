@@ -5,8 +5,16 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
 		http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration-4.2.xsd">
 
+    <int:gateway service-interface="com.oreilly.demo.PrinterGateway"
+                 default-request-channel="inputChannel"/>
 
-    <int:router ref="customRouter" input-channel="inputChannel"/>
+    <int:channel id="inputChannel"/>
+    <int:channel id="outputChannel"/>
 
+    <int:filter expression="payload.equals(4)" input-channel="inputChannel" output-channel="outputChannel"/>
+
+    <bean id="printService" class="com.oreilly.demo.PrintService"/>
+
+    <int:service-activator ref="printService" method="print" input-channel="outputChannel"/>
 
 </beans>

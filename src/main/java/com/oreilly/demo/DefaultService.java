@@ -2,10 +2,10 @@ package com.oreilly.demo;
 
 import org.springframework.messaging.Message;
 
-public class PrintService {
+public class DefaultService {
 
     public void print(Message<?> message) {
-        System.out.println(message.getPayload());
+        System.out.println("Print from the default service");
     }
 
 }
