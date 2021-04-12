@@ -31,8 +31,7 @@ public class SpringIntegrationDemoApplication implements ApplicationRunner {
     public void run(ApplicationArguments arg0) {
         for (int i = 0; i < 10; i++) {
             Message<?> message = MessageBuilder
-                    .withPayload(i)
-                    .setHeader("routeHeader", "string")
+                    .withPayload("" + i)
                     .build();
             this.gateway.print(message);
         }
