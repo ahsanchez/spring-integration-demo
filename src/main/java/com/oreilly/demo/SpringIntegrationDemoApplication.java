@@ -27,8 +27,8 @@ public class SpringIntegrationDemoApplication implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments arg0) throws InterruptedException, ExecutionException {
         String[] payloads = {"Ana Hinojosa", "Pilar Molina", "Esperaza Sánchez"};
-        for (int x = 0; x < payloads.length; x++) {
-            Message<?> message = MessageBuilder.withPayload(payloads[x]).build();
+        for (String payload : payloads) {
+            Message<?> message = MessageBuilder.withPayload(payload).build();
             this.gateway.print(message);
         }
 
