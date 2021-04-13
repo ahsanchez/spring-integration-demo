@@ -9,9 +9,11 @@
                  default-request-channel="inputChannel"/>
 
     <int:channel id="inputChannel"/>
+    <int:channel id="filterChannel"/>
     <int:channel id="outputChannel"/>
 
-    <int:object-to-json-transformer input-channel="inputChannel" output-channel="outputChannel"/>
+    <int:header-filter header-names="privateKey " input-channel="inputChannel" output-channel="filterChannel"/>
+    <int:object-to-json-transformer input-channel="filterChannel" output-channel="outputChannel"/>
 
     <bean id="printService" class="com.oreilly.demo.PrintService"/>
 
