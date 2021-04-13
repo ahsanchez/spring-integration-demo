@@ -5,26 +5,19 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
 		http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration-4.2.xsd">
 
-    <int:gateway service-interface="com.oreilly.demo.PrinterGateway"
-                 default-request-channel="inputChannel"/>
+    <int:gateway service-interface="com.oreilly.demo.EnhancedPrinterGateway"
+                 default-request-channel="printChannel">
+        <int:default-header name="globalHeader" value="simpleValue"/>
+        <int:method name="print" request-channel="printChannel">
+            <int:header name="individualHeader" expression="#args[0].firstName"/>
+        </int:method>
+        <int:method name="uppercase" request-channel="uppercaseChannel"/>
+    </int:gateway>
 
-    <int:channel id="inputChannel"/>
-    <int:channel id="enricherChannel"/>
-    <int:channel id="filterChannel"/>
-    <int:channel id="outputChannel"/>
-    <int:channel id="requestChannel"/>
+    <int:channel id="printChannel"/>
+    <int:channel id="uppercaseChannel"/>
 
-    <int:enricher input-channel="inputChannel" request-channel="requestChannel" output-channel="enricherChannel">
-        <int:property name="phoneNumber" expression="payload"/>
-    </int:enricher>
-
-
-    <int:header-filter header-names="privateKey " input-channel="enricherChannel" output-channel="filterChannel"/>
-    <int:object-to-json-transformer input-channel="filterChannel" output-channel="outputChannel"/>
-
-    <bean id="printService" class="com.oreilly.demo.PrintService"/>
-
-    <int:service-activator ref="printService" method="print" input-channel="outputChannel"/>
-    <int:service-activator ref="customService" method="getPhoneNumber" input-channel="requestChannel"/>
+    <int:service-activator ref="uppercaseService" method="execute" input-channel="uppercaseChannel"/>
+    <int:service-activator ref="printService" method="print" input-channel="printChannel"/>
 
 </beans>
