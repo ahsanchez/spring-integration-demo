@@ -12,16 +12,19 @@
     <int:channel id="enricherChannel"/>
     <int:channel id="filterChannel"/>
     <int:channel id="outputChannel"/>
+    <int:channel id="requestChannel"/>
 
-    <int:header-enricher input-channel="inputChannel" output-channel="enricherChannel">
-        <!--<int:header name="publicKey" value="54321"/>-->
-        <int:header name="publicKey" ref="customHeaderEnricher" method="getHeaderValue"/>
-    </int:header-enricher>
+    <int:enricher input-channel="inputChannel" request-channel="requestChannel" output-channel="enricherChannel">
+        <int:property name="phoneNumber" expression="payload"/>
+    </int:enricher>
+
+
     <int:header-filter header-names="privateKey " input-channel="enricherChannel" output-channel="filterChannel"/>
     <int:object-to-json-transformer input-channel="filterChannel" output-channel="outputChannel"/>
 
     <bean id="printService" class="com.oreilly.demo.PrintService"/>
 
     <int:service-activator ref="printService" method="print" input-channel="outputChannel"/>
+    <int:service-activator ref="customService" method="getPhoneNumber" input-channel="requestChannel"/>
 
 </beans>
