@@ -5,19 +5,14 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
 		http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration-4.2.xsd">
 
-    <int:gateway service-interface="com.oreilly.demo.EnhancedPrinterGateway"
-                 default-request-channel="printChannel">
-        <int:default-header name="globalHeader" value="simpleValue"/>
-        <int:method name="print" request-channel="printChannel">
-            <int:header name="individualHeader" expression="#args[0].firstName"/>
-        </int:method>
-        <int:method name="uppercase" request-channel="uppercaseChannel"/>
-    </int:gateway>
+    <int:inbound-channel-adapter ref="personDirectoryService" method="findNewPeople" channel="registerChannel">
+        <int:poller fixed-rate="3000">
+        </int:poller>
+    </int:inbound-channel-adapter>
 
-    <int:channel id="printChannel"/>
-    <int:channel id="uppercaseChannel"/>
+    <int:channel id="registerChannel"/>
 
-    <int:service-activator ref="uppercaseService" method="execute" input-channel="uppercaseChannel"/>
-    <int:service-activator ref="printService" method="print" input-channel="printChannel"/>
+    <int:outbound-channel-adapter ref="personRegistrationService" method="registerEmail"
+                                  channel="registerChannel"/>
 
 </beans>
