@@ -2,32 +2,43 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:int="http://www.springframework.org/schema/integration"
-       xmlns:int-ftp="http://www.springframework.org/schema/integration/ftp"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       xmlns:int-jdbc="http://www.springframework.org/schema/integration/jdbc"
+       xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+       xsi:schemaLocation="http://www.springframework.org/schema/integration/jdbc http://www.springframework.org/schema/integration/jdbc/spring-integration-jdbc-4.2.xsd
+		http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-4.2.xsd
 
-		http://www.springframework.org/schema/integration/ftp http://www.springframework.org/schema/integration/ftp/spring-integration-ftp-4.2.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+
+
 		http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration-4.2.xsd">
 
-    <bean id="ftpClientFactory" class="org.springframework.integration.ftp.session.DefaultFtpSessionFactory">
-        <property name="host" value="localhost"/>
-        <property name="port" value="21"/>
-        <property name="username" value="admin"/>
-        <property name="password" value="12345678"/>
-    </bean>
+    <int:gateway service-interface="com.oreilly.demo.PersonGateway" default-request-channel="inboundChannel"/>
 
-    <int-ftp:inbound-channel-adapter
-            session-factory="ftpClientFactory"
-            local-directory="file:src/test/write"
-            remote-directory="files"
-            channel="ftpChannel"
-            delete-remote-files="true">
-        <int:poller fixed-rate="5000"/>
-    </int-ftp:inbound-channel-adapter>
+    <int-jdbc:outbound-gateway request-channel="inboundChannel" data-source="datasource"
+                               update="insert into person values(:payload.id,:payload.firstName,:payload.lastName)"
+                               query="select * from person where person_id = :payload.id"
+                               reply-channel="jdbcChannel"/>
 
-    <int:channel id="ftpChannel"/>
+    <!-- 2: <int-jdbc:outbound-channel-adapter
+            channel="inboundChannel"
+            data-source="datasource"
+            query="insert into person values(:payload.id,:payload.firstName,:payload.lastName)"/>-->
 
-    <int:service-activator ref="filePrinter" method="print" input-channel="ftpChannel"/>
+    <jdbc:embedded-database id="datasource" type="H2">
+        <jdbc:script location="init.sql"/>
+    </jdbc:embedded-database>
 
-    <bean id="filePrinter" class="com.oreilly.demo.FilePrinter"/>
+    <!--   1: <int-jdbc:inbound-channel-adapter
+                channel="jdbcChannel"
+                query="select * from person"
+                data-source="datasource">
+            <int:poller fixed-rate="4000"/>
+        </int-jdbc:inbound-channel-adapter>
+    -->
+
+    <int:service-activator ref="mp" method="print" input-channel="jdbcChannel"/>
+
+    <int:channel id="jdbcChannel"/>
+    <int:channel id="inboundChannel"/>
 
 </beans>
