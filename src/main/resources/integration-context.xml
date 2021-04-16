@@ -6,8 +6,25 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
 
 		http://www.springframework.org/schema/integration/jms http://www.springframework.org/schema/integration/jms/spring-integration-jms-4.2.xsd
+
 		http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration-4.2.xsd">
 
+    <!-- Method invocation sends a Message to the queue -->
+    <int:gateway service-interface="com.oreilly.demo.PersonGateway"
+                 default-request-channel="inboundChannel"/>
+
+    <int:object-to-string-transformer input-channel="inboundChannel" output-channel="outboundChannel"/>
+
+    <int-jms:outbound-gateway
+            request-destination="queue"
+            request-channel="outboundChannel"
+            reply-destination="replyQueue"
+            reply-channel="replyChannel"
+    />
+
+    <int:service-activator ref="mp" method="printConsole" input-channel="replyChannel"/>
+
+    <!-- Will check the queue for messages to process and pass them to service activator -->
     <int-jms:inbound-gateway
             connection-factory="connectionFactory"
             request-destination="queue"
@@ -15,6 +32,16 @@
             default-reply-destination="replyQueue"/>
 
     <int:service-activator ref="mp" method="print" input-channel="jmsChannel"/>
+
+    <bean id="mp" class="com.oreilly.demo.MessagePrinter"/>
+
+    <int:channel id="jmsChannel"/>
+
+    <int:channel id="inboundChannel"/>
+
+    <int:channel id="outboundChannel"/>
+
+    <int:channel id="replyChannel"/>
 
     <bean id="connectionFactory" class="org.springframework.jms.connection.CachingConnectionFactory">
         <property name="targetConnectionFactory">
@@ -31,20 +58,5 @@
     <bean id="queue" class="org.apache.activemq.command.ActiveMQQueue">
         <constructor-arg value="sample.queue"/>
     </bean>
-
-    <int-jms:outbound-channel-adapter
-            connection-factory="connectionFactory"
-            channel="outboundChannel"
-            destination="queue"/>
-
-    <int:object-to-string-transformer input-channel="inboundChannel" output-channel="outboundChannel"/>
-
-    <int:gateway service-interface="com.oreilly.demo.PersonGateway" default-request-channel="inboundChannel"/>
-
-    <int:channel id="jmsChannel"/>
-
-    <int:channel id="inboundChannel"/>
-
-    <int:channel id="outboundChannel"/>
 
 </beans>
