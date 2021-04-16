@@ -3,7 +3,7 @@ package com.oreilly.demo;
 import org.springframework.messaging.Message;
 import org.springframework.stereotype.Component;
 
-@Component("mp")
+@Component("printer")
 public class MessagePrinter {
 
     public String print(Message<?> message) {

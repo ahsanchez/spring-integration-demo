@@ -1,6 +1,5 @@
 package com.oreilly.demo;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
@@ -12,8 +11,6 @@ import org.springframework.context.annotation.ImportResource;
 @Configuration
 @ImportResource("integration-context.xml")
 public class SpringIntegrationDemoApplication implements ApplicationRunner {
-    @Autowired
-    PersonGateway personGateway;
 
     public static void main(String[] args) {
         SpringApplication.run(SpringIntegrationDemoApplication.class, args);
@@ -21,7 +18,5 @@ public class SpringIntegrationDemoApplication implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments arg0) {
-        personGateway.save(new Person(3, "Ana", "Hinojosa"));
-        System.out.println("The message has been sent to JMS.");
     }
 }
