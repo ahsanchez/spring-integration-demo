@@ -4,18 +4,44 @@
        xmlns:int="http://www.springframework.org/schema/integration"
        xmlns:int-http="http://www.springframework.org/schema/integration/http"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+
+
 		http://www.springframework.org/schema/integration/http http://www.springframework.org/schema/integration/http/spring-integration-http.xsd
 		http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration.xsd">
 
-    <int-http:inbound-channel-adapter
-            path="/"
+    <int:gateway service-interface="com.oreilly.demo.SimpleGateway"
+                 default-request-channel="httpOutbound"/>
+
+    <int:channel id="httpOutbound"/>
+
+    <!--<int-http:outbound-channel-adapter
+            channel="httpOutbound"
+            http-method="GET"
+            url="http://localhost:8080/"
+    />-->
+
+    <int-http:outbound-gateway
+            request-channel="httpOutbound"
+            url="http://localhost:8080/"
+            http-method="GET"
+            reply-channel="httpReply"/>
+
+    <bean class="com.oreilly.demo.MessagePrinter" id="printer2"/>
+
+    <int:service-activator ref="printer2" input-channel="httpReply" method="printConsole"/>
+
+
+    <int-http:inbound-gateway
+            request-channel="httpChannel"
             supported-methods="GET"
-            channel="httpChannel">
-    </int-http:inbound-channel-adapter>
+            path="/"/>
 
     <int:channel id="httpChannel"/>
+    <int:channel id="httpReply"/>
 
-    <int:service-activator ref="printer" input-channel="httpChannel" method="printConsole"/>
+    <bean class="com.oreilly.demo.MessagePrinter" id="printer"/>
+
+    <int:service-activator ref="printer" input-channel="httpChannel" method="print"/>
 
 
 </beans>
