@@ -6,8 +6,9 @@ import org.springframework.stereotype.Component;
 @Component("mp")
 public class MessagePrinter {
 
-    public void print(Message<?> message) {
+    public String print(Message<?> message) {
         System.out.println("Print the message:");
         System.out.println(message);
+        return "1 message worked";
     }
 }
