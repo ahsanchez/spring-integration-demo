@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 public class MessagePrinter {
 
     public void print(Message<?> message) {
+        System.out.println("Print the message:");
         System.out.println(message);
     }
 }

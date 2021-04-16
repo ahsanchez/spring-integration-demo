@@ -22,5 +22,6 @@ public class SpringIntegrationDemoApplication implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments arg0) {
         personGateway.save(new Person(3, "Ana", "Hinojosa"));
+        System.out.println("The message has been sent to JMS.");
     }
 }
