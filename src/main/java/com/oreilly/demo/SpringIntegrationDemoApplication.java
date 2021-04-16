@@ -5,23 +5,27 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportResource;
 
 @SpringBootApplication
-@Configuration
 @ImportResource("integration-context.xml")
 public class SpringIntegrationDemoApplication implements ApplicationRunner {
 
+    private String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><people>" +
+            "<person><firstName>Kevin</firstName><lastName>Bowersox</lastName></person>" +
+            "<person><firstName>John</firstName><lastName>Doe</lastName></person>" +
+            "</people>";
+
     @Autowired
-    SimpleGateway simpleGateway;
+    private SimpleGateway gateway;
 
     public static void main(String[] args) {
         SpringApplication.run(SpringIntegrationDemoApplication.class, args);
     }
 
     @Override
-    public void run(ApplicationArguments arg0) {
-        this.simpleGateway.execute("Anything");
+    public void run(ApplicationArguments args) throws Exception {
+        this.gateway.execute(xml);
     }
+
 }

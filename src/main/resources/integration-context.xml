@@ -2,46 +2,47 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:int="http://www.springframework.org/schema/integration"
-       xmlns:int-http="http://www.springframework.org/schema/integration/http"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       xmlns:int-xml="http://www.springframework.org/schema/integration/xml"
+       xsi:schemaLocation="http://www.springframework.org/schema/integration/xml http://www.springframework.org/schema/integration/xml/spring-integration-xml-4.2.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
 
 
-		http://www.springframework.org/schema/integration/http http://www.springframework.org/schema/integration/http/spring-integration-http.xsd
 		http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration.xsd">
 
     <int:gateway service-interface="com.oreilly.demo.SimpleGateway"
-                 default-request-channel="httpOutbound"/>
+                 default-request-channel="xmlInput"/>
 
-    <int:channel id="httpOutbound"/>
-
-    <!--<int-http:outbound-channel-adapter
-            channel="httpOutbound"
-            http-method="GET"
-            url="http://localhost:8080/"
+    <!--<int-xml:xpath-transformer
+            input-channel="xmlInput"
+            output-channel="xmlOutput"
+            xpath-expression="/people/person[1]/firstName"
     />-->
 
-    <int-http:outbound-gateway
-            request-channel="httpOutbound"
-            url="http://localhost:8080/"
-            http-method="GET"
-            reply-channel="httpReply"/>
+    <!--<int-xml:xpath-header-enricher
+            input-channel="xmlInput"
+            output-channel="xmlOutput">
+        <int-xml:header name="recordCount" xpath-expression="count(/people/person)"/>
+    </int-xml:xpath-header-enricher>-->
 
-    <bean class="com.oreilly.demo.MessagePrinter" id="printer2"/>
+    <int-xml:xpath-splitter
+            input-channel="xmlInput"
+            output-channel="xmlOutput">
+        <int-xml:xpath-expression expression="/people/person"/>
+    </int-xml:xpath-splitter>
 
-    <int:service-activator ref="printer2" input-channel="httpReply" method="printConsole"/>
-
-
-    <int-http:inbound-gateway
-            request-channel="httpChannel"
-            supported-methods="GET"
-            path="/"/>
-
-    <int:channel id="httpChannel"/>
-    <int:channel id="httpReply"/>
+    <int-xml:xpath-filter
+            input-channel="xmlOutput"
+            output-channel="xmlFilter">
+        <int-xml:xpath-expression expression="/person/firstName = 'Kevin'"/>
+    </int-xml:xpath-filter>
 
     <bean class="com.oreilly.demo.MessagePrinter" id="printer"/>
 
-    <int:service-activator ref="printer" input-channel="httpChannel" method="print"/>
+    <int:service-activator ref="printer" input-channel="xmlFilter" method="printConsole"/>
+
+    <int:channel id="xmlInput"/>
+    <int:channel id="xmlOutput"/>
+    <int:channel id="xmlFilter"/>
 
 
 </beans>
